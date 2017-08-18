@@ -20,6 +20,10 @@
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         _manager = [[NetWorkManager alloc] initWithBaseURL:nil];
+        _manager.responseSerializer.acceptableContentTypes = nil;//[NSSet setWithObject:@"text/ plain"];
+        _manager.securityPolicy = [AFSecurityPolicy defaultPolicy];
+        _manager.securityPolicy.allowInvalidCertificates = YES;//忽略https证书
+        _manager.securityPolicy.validatesDomainName = NO;//是否验证域名
     });
     return _manager;
 }
@@ -40,7 +44,7 @@
     self.responseSerializer.stringEncoding = NSUTF8StringEncoding;
     self.requestSerializer.timeoutInterval = TIMEOUT;
 //    [manager.requestSerializer setValue:@"application/json; charset=utf-8" forHTTPHeaderField:@"Content-Type"];
-//    manager.responseSerializer.acceptableContentTypes = [NSSet setWithObject:@"application/json"];
+    self.responseSerializer.acceptableContentTypes = nil;
     if ([[NSUserDefaults standardUserDefaults] boolForKey:@"kIsLogin"]) {
 //        [manager.requestSerializer setValue:Context.currentUser.Token forHTTPHeaderField:@"X-EEXUU-Token"];
     }
