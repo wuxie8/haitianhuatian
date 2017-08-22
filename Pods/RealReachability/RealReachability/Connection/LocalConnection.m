@@ -63,7 +63,7 @@ static NSString *connectionFlags(SCNetworkReachabilityFlags flags)
         struct sockaddr_in address;
         bzero(&address, sizeof(address));
         address.sin_len = sizeof(address);
-        address.sin_family = AF_INET;
+        address.sin_family = AF_INET6;
         _reachabilityRef = SCNetworkReachabilityCreateWithAddress(NULL, (struct sockaddr *) &address);
         
         _reachabilitySerialQueue = dispatch_queue_create("com.dustturtle.realreachability", NULL);

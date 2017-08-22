@@ -148,7 +148,7 @@ static NSString *const headerId = @"headerId1";
 }
 - (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout referenceSizeForHeaderInSection:(NSInteger)section
 {
-    return (CGSize){WIDTH,0.2*HEIGHT};
+    return (CGSize){WIDTH,0.2*HEIGHT<130?130:0.2*HEIGHT};
 }
 -(void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
 {

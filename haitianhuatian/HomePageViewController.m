@@ -30,7 +30,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     self.title=@"首页";
-    homepageTable=[[UITableView alloc]initWithFrame:CGRectMake(0, 0, WIDTH, HEIGHT-49-20-44)];
+    homepageTable=[[UITableView alloc]initWithFrame:CGRectMake(0, 0, WIDTH, HEIGHT-20-44-15)];
     homepageTable.delegate=self;
     homepageTable.dataSource=self;
     homepageTable.tableHeaderView=self.headView;

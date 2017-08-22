@@ -114,12 +114,22 @@ static void AFNetworkReachabilityReleaseCallback(const void *info) {
 @implementation AFNetworkReachabilityManager
 
 + (instancetype)sharedManager {
-    static AFNetworkReachabilityManager *_sharedManager = nil;
+    static AFNetworkReachabilityManager*_sharedManager =nil;
+    
     static dispatch_once_t onceToken;
+    
     dispatch_once(&onceToken, ^{
-        _sharedManager = [self manager];
+        
+        struct sockaddr_in6 address;
+        
+        bzero(&address,sizeof(address));
+        
+        address.sin6_len=sizeof(address);
+        
+        address.sin6_family=AF_INET6;
+        
+        _sharedManager = [self managerForAddress:&address];
     });
-
     return _sharedManager;
 }
 
@@ -151,7 +161,7 @@ static void AFNetworkReachabilityReleaseCallback(const void *info) {
         address.sin6_family = AF_INET6;
         return [self managerForAddress:&address];
     } else {
-#if (defined(__IPHONE_OS_VERSION_MIN_REQUIRED) && __IPHONE_OS_VERSION_MIN_REQUIRED >= 90000) || (defined(__MAC_OS_X_VERSION_MIN_REQUIRED) && __MAC_OS_X_VERSION_MIN_REQUIRED >= 101100)
+ #if (TARGET_OS_IPHONE && NSFoundationVersionNumber > 1240) || (TARGET_OS_MAC && NSFoundationVersionNumber >= 1252)
         struct sockaddr_in6 address;
         bzero(&address, sizeof(address));
         address.sin6_len = sizeof(address);

@@ -28,6 +28,8 @@
     image.contentMode=UIViewContentModeScaleAspectFill;
     [self.view addSubview:image];
     self.title=@"密码登录";
+    UITapGestureRecognizer *tap=[[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(keyBord)];
+    [self.view addGestureRecognizer:tap];
     UIBarButtonItem *backItem = [[UIBarButtonItem alloc] initWithTitle:@"注册" style:UIBarButtonItemStylePlain  target:self action:@selector(registere)];
     self.navigationItem.rightBarButtonItem = backItem;
     UIView *  loginView=[[UIView alloc]initWithFrame:CGRectMake(0, CGRectGetMaxY(image.frame), WIDTH, HEIGHT-ButtonWeight)];
@@ -89,7 +91,9 @@
     [loginView addSubview:ForgotpasswordBut];
     // Do any additional setup after loading the view.
 }
-
+-(void)keyBord  {
+    [self.view endEditing:YES];
+}
 -(void)registere
 {
     RegisterVC *registervc=[[RegisterVC alloc]init];
