@@ -14,6 +14,7 @@
 #import "ProductDetailsViewController.h"
 #import "LoginViewController.h"
 #import "UIImageView+AFNetworking.h"
+#import "MJRefresh.h"
 
 #define pageHeight 160
 
@@ -30,14 +31,19 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     self.title=@"首页";
-    homepageTable=[[UITableView alloc]initWithFrame:CGRectMake(0, 0, WIDTH, HEIGHT-20-44-15)];
+    homepageTable=[[UITableView alloc]initWithFrame:CGRectMake(0, 0, WIDTH, HEIGHT-20-44-49)];
     homepageTable.delegate=self;
     homepageTable.dataSource=self;
     homepageTable.tableHeaderView=self.headView;
     homepageTable.tableFooterView=[UIView new];
+    homepageTable.mj_header = [MJRefreshNormalHeader headerWithRefreshingBlock:^{
+        // 进入刷新状态后会自动调用这个block
+        [self getData];
+    }];
+    // 马上进入刷新状态
+    [homepageTable.mj_header beginRefreshing];
     [self.view addSubview:homepageTable];
     
-    [self getData];
     // Do any additional setup after loading the view.
 }
 -(void)getData
@@ -50,69 +56,75 @@
     NSArray *array=@[@"现金白条-你我贷",@"现金白条-随手贷",@"现金白条-保单贷",@"现金白条-供房贷",@"现金白条-税金贷",@"现金白条-学信贷"];
 
     [[NetWorkManager sharedManager]postNoTipJSON:loan parameters:dic success:^(NSURLSessionDataTask *task, id responseObject) {
-        NSArray *arr=responseObject[@"list"];
-        if ([UtilTools isBlankString:responseObject[@"review"]]) {
-            [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"review"];
-        }else
-        {
-            [[NSUserDefaults standardUserDefaults] setBool:[responseObject[@"review"]boolValue] forKey:@"review"];
+        [homepageTable.mj_header endRefreshing];
 
-        }
-        if (![UtilTools isBlankArray:arr]) {
-            for (int i=0; i<arr.count; i++) {
-                NSDictionary *diction=arr[i];
-                productModel *pro=[[productModel alloc]init];
-               
-                if ([[NSUserDefaults standardUserDefaults] boolForKey:@"review"]) {
-                    pro.smeta=@"icon";
+        if ([responseObject[@"status"]boolValue]) {
+            NSArray *arr=responseObject[@"list"];
+            if ([UtilTools isBlankString:responseObject[@"review"]]) {
+                [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"review"];
+            }else
+            {
+                [[NSUserDefaults standardUserDefaults] setBool:[responseObject[@"review"]boolValue] forKey:@"review"];
+                
+            }
+            if (![UtilTools isBlankArray:arr]) {
+                for (int i=0; i<arr.count; i++) {
+                    NSDictionary *diction=arr[i];
+                    productModel *pro=[[productModel alloc]init];
                     
-                    int location=i%array.count;
-                    pro.post_title=array[location];
+                    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"review"]) {
+                        pro.smeta=@"icon";
+                        
+                        int location=i%array.count;
+                        pro.post_title=array[location];
+                    }
+                    else
+                    {
+                        NSString *jsonString=diction[@"smeta"];
+                        NSData *jsonData = [jsonString dataUsingEncoding:NSUTF8StringEncoding];
+                        NSError *err;
+                        NSDictionary *imagedic = [NSJSONSerialization JSONObjectWithData:jsonData
+                                                                                 options:NSJSONReadingMutableContainers
+                                                                                   error:&err];
+                        pro.smeta=imagedic[@"thumb"];
+                        pro.post_title=diction[@"post_title"];
+                    }
+                    
+                    pro.link=diction[@"link"];
+                    pro.edufanwei=diction[@"edufanwei"];
+                    pro.qixianfanwei=diction[@"qixianfanwei"];
+                    pro.shenqingtiaojian=diction[@"shenqingtiaojian"];
+                    pro.zuikuaifangkuan=diction[@"zuikuaifangkuan"];
+                    
+                    pro.post_hits=diction[@"post_hits"];
+                    pro.feilv=diction[@"feilv"];
+                    pro.productID=diction[@"id"];
+                    pro.post_excerpt=diction[@"post_excerpt"];
+                    NSArray *tags=diction[@"tags"];
+                    NSMutableArray *tagsArray=[NSMutableArray array];
+                    for (NSDictionary *dic in tags) {
+                        [tagsArray addObject:dic[@"tag_name"]];
+                    }
+                    pro.tagsArray=tagsArray;
+                    pro.fv_unit=diction[@"fv_unit"];
+                    
+                    pro.qx_unit=diction[@"qx_unit"];
+                    
+                    [self.productMutableArray addObject:pro];
+                    
                 }
-                else
-                {
-                    NSString *jsonString=diction[@"smeta"];
-                    NSData *jsonData = [jsonString dataUsingEncoding:NSUTF8StringEncoding];
-                    NSError *err;
-                    NSDictionary *imagedic = [NSJSONSerialization JSONObjectWithData:jsonData
-                                                                             options:NSJSONReadingMutableContainers
-                                                                               error:&err];
-                    pro.smeta=imagedic[@"thumb"];
-                    pro.post_title=diction[@"post_title"];
-                }
-
-                pro.link=diction[@"link"];
-                pro.edufanwei=diction[@"edufanwei"];
-                pro.qixianfanwei=diction[@"qixianfanwei"];
-                pro.shenqingtiaojian=diction[@"shenqingtiaojian"];
-                pro.zuikuaifangkuan=diction[@"zuikuaifangkuan"];
                 
-                pro.post_hits=diction[@"post_hits"];
-                pro.feilv=diction[@"feilv"];
-                pro.productID=diction[@"id"];
-                pro.post_excerpt=diction[@"post_excerpt"];
-                NSArray *tags=diction[@"tags"];
-                NSMutableArray *tagsArray=[NSMutableArray array];
-                for (NSDictionary *dic in tags) {
-                    [tagsArray addObject:dic[@"tag_name"]];
-                }
-                pro.tagsArray=tagsArray;
-                pro.fv_unit=diction[@"fv_unit"];
-                
-                pro.qx_unit=diction[@"qx_unit"];
-                
-                [self.productMutableArray addObject:pro];
-
             }
             
+            [homepageTable reloadData];
+            
+
         }
-        
-        [homepageTable reloadData];
-        
-        
+
     } failure:^(NSURLSessionDataTask *task, NSError *error) {
         
-        
+        [homepageTable.mj_header endRefreshing];
+
     }];
     
     
@@ -164,7 +176,7 @@
 
 -(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    return 130;
+    return 140;
 }
 #pragma mark  UITableViewDataSource
 
@@ -209,9 +221,29 @@
     }
     cell.titleLabel.text=model.post_title;
     cell.detailLabel.text=model.post_excerpt;
-    cell.post_hits_Label.text=model.post_hits;
-    cell.feliv_Label.text=model.feilv;
-    cell.interestrateLabel.text=[model.qx_unit isEqualToString:@"1"]?@"日利率":@"月利率" ;
+    NSString *str=[NSString stringWithFormat:@"申请人数 %@人",model.post_hits];
+    NSMutableAttributedString *AttributedStr = [[NSMutableAttributedString alloc]initWithString:str];
+    
+    [AttributedStr addAttribute:NSForegroundColorAttributeName
+     
+                          value:kColorFromRGBHex(0xe44545)
+     
+                          range:NSMakeRange(4, [AttributedStr length]-4)];
+    
+    cell.post_hits_Label.attributedText=AttributedStr;
+//    cell.post_hits_Label.text=[NSString stringWithFormat:@"申请人数  %@",model.post_hits];
+//    cell.feliv_Label.text=model.feilv;
+    NSString *str1=[NSString stringWithFormat:@"%@  %@",[model.qx_unit isEqualToString:@"1"]?@"日利率":@"月利率",model.feilv];
+    NSMutableAttributedString *AttributedStr1 = [[NSMutableAttributedString alloc]initWithString:str1];
+    
+    [AttributedStr1 addAttribute:NSForegroundColorAttributeName
+     
+                          value:kColorFromRGBHex(0xe44545)
+     
+                          range:NSMakeRange(3, [AttributedStr1 length]-3)];
+    
+    cell.feliv_Label.attributedText=AttributedStr1;
+//    cell.feliv_Label.text=[NSString stringWithFormat:@"%@  %@",[model.qx_unit isEqualToString:@"1"]?@"日利率":@"月利率",model.feilv] ;
     return cell;
 
 }
@@ -226,7 +258,7 @@
                            
                            nil];
        
-        [[NetWorkManager sharedManager]getJSON:@"http://app.jishiyu11.cn/index.php?g=app&m=product&a=hits" parameters:dic success:^(NSURLSessionDataTask *task, id responseObject) {
+        [[NetWorkManager sharedManager]getNoTipJSON:@"http://app.jishiyu11.cn/index.php?g=app&m=product&a=hits" parameters:dic success:^(NSURLSessionDataTask *task, id responseObject) {
             
         } failure:^(NSURLSessionDataTask *task, NSError *error) {
             

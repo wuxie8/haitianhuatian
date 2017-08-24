@@ -199,9 +199,9 @@
                            success:(void (^)(NSURLSessionDataTask *task, id responseObject))success
                            failure:(void (^)(NSURLSessionDataTask *task, NSError *error))failure
 {
-    if ([NetWorkUtil currentNetWorkStatus] == NET_UNKNOWN) {
-        return nil;
-    }
+//    if ([NetWorkUtil currentNetWorkStatus] == NET_UNKNOWN) {
+//        return nil;
+//    }
     
 //    [self configNetManager:name];
     

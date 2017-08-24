@@ -69,10 +69,10 @@ static NSString *const headerId = @"headerId1";
 // 和UITableView类似，UICollectionView也可设置段头段尾
 - (UICollectionReusableView *)collectionView:(UICollectionView *)collectionView viewForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
 {
-    UICollectionReusableView *headerView;
+    UICollectionReusableView *headerView = [collectionView  dequeueReusableSupplementaryViewOfKind:kind withReuseIdentifier:headerId forIndexPath:indexPath];
     if([kind isEqualToString:UICollectionElementKindSectionHeader])
     {
-        headerView = [collectionView  dequeueReusableSupplementaryViewOfKind:kind withReuseIdentifier:headerId forIndexPath:indexPath];
+        
         if(headerView == nil)
         {
             headerView = [[UICollectionReusableView alloc] init];
@@ -100,12 +100,10 @@ static NSString *const headerId = @"headerId1";
         }
         [headBut addTarget:self action:@selector(login) forControlEvents:UIControlEventTouchUpInside];
         [headerView addSubview:headBut];
-        return headerView;
 
     }
-    else{
-        return nil;
-    }
+    return headerView;
+
     
 }
 -(void)login{

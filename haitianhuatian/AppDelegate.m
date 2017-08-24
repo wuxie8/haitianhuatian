@@ -46,7 +46,37 @@
     }
     self.window  = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
     
-    self.window.rootViewController=[AppDelegate setTabBarController];
+    self.window.rootViewController = [UIViewController new];
+    [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"review"];
+
+    NSDictionary *dic=[NSDictionary dictionaryWithObjectsAndKeys:
+                       appcode,@"code",
+                       @"1.0.0",@"version",
+                       @"1",@"page",
+                       nil];
+    [[NetWorkManager sharedManager]postNoTipJSON:loan parameters:dic success:^(NSURLSessionDataTask *task, id responseObject) {
+        NSDictionary *dic=(NSDictionary *)responseObject;
+        if ([dic[@"status"]boolValue]) {
+            
+            
+            if ([UtilTools isBlankString:dic[@"review"]]) {
+                [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"review"];
+            }else
+            {
+                [[NSUserDefaults standardUserDefaults] setBool:[dic[@"review"]boolValue] forKey:@"review"];
+                
+                
+            }
+            [[NSUserDefaults standardUserDefaults] synchronize];
+
+            self.window.rootViewController = [AppDelegate setTabBarController];
+            
+        }
+    } failure:^(NSURLSessionDataTask *task, NSError *error) {
+                self.window.rootViewController=[AppDelegate setTabBarController];
+        
+        
+    }];
     
     [self.window makeKeyAndVisible];
     // Override point for customization after application launch.
@@ -96,14 +126,30 @@
     [tabBarController.tabBar insertSubview:barBgView atIndex:0];
     tabBarController.tabBar.opaque = YES;
     
-    tabBarController.viewControllers=@[nav8C,nav5C,nav7C];
     tabBarController.selectedIndex = 0; //默认选中第几个图标（此步操作在绑定viewControllers数据源之后）
-    NSArray *titles = @[@"首页",@"论坛",@"个人中心",@"个人中心"];
-    NSArray *images=@[@"HomePage",@"BBS",@"Mine",@"PersonCenter"];
-    NSArray *selectedImages=@[@"HomePageYellow",@"BBSYelllow",@"MineYellow",@"PersonCenterHeight"];
-    //               NSArray *titles = @[@"简单借款秒借版",@"个人中心",@"设置"];
-    //        NSArray *images=@[@"lending",@"Mineing"];
-    //         NSArray *selectedImages=@[@"lendingBlue",@"MineingBlue"];
+    NSArray *titles;
+    NSArray *images;
+    NSArray *selectedImages;
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"review"]) {
+        tabBarController.viewControllers=@[nav8C,nav5C,nav7C];
+                titles= @[@"首页",@"论坛",@"个人中心"];
+        images=@[@"HomePage",@"BBS",@"Mine"];
+
+        
+        selectedImages=@[@"HomePageYellow",@"BBSYelllow",@"MineYellow"];
+
+        
+            }
+            else{
+                tabBarController.viewControllers=@[nav8C,nav7C];
+        titles = @[@"首页",@"个人中心"];
+                images=@[@"HomePage",@"Mine"];
+                
+                
+                selectedImages=@[@"HomePageYellow",@"MineYellow"];
+        
+            }
+
     
     //绑定TabBar数据源
     for (int i = 0; i<tabBarController.tabBar.items.count; i++) {
