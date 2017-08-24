@@ -111,7 +111,6 @@
         
         
     } failure:^(NSURLSessionDataTask *task, NSError *error) {
-        NSLog(@"%@",error);
         
         
     }];
@@ -219,6 +218,22 @@
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
     if ([[NSUserDefaults standardUserDefaults] boolForKey:@"kIsLogin"]) {
         productModel *model=[self.productMutableArray objectAtIndex:indexPath.row];
+        
+        NSDictionary *dic=[NSDictionary dictionaryWithObjectsAndKeys:
+                           model.productID,@"id",
+                           Context.currentUser.uid,@"uid",
+                           appNo,@"channel",
+                           
+                           nil];
+       
+        [[NetWorkManager sharedManager]getJSON:@"http://app.jishiyu11.cn/index.php?g=app&m=product&a=hits" parameters:dic success:^(NSURLSessionDataTask *task, id responseObject) {
+            
+        } failure:^(NSURLSessionDataTask *task, NSError *error) {
+            
+            
+        }];
+
+
         ProductDetailsViewController * productDetails=[ProductDetailsViewController new];
         productDetails.productModel=model;
         productDetails.hidesBottomBarWhenPushed=YES;
