@@ -68,7 +68,6 @@
 - (void)loadFromURLStr:(NSString *)urlStr
 {
     urlStr = [urlStr stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-
     NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:urlStr]];
     [self.webView loadRequest:request];
     self.webView.scalesPageToFit=YES;
